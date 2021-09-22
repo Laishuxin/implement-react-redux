@@ -40,14 +40,12 @@ const Grandson = () => {
   )
 }
 
-const User = connect(({ state }) => {
+const User = connect(state => ({ user: state.user }))(({ user }) => {
   console.log('User: ', Math.random())
-  return <div>user: {state.user.name}</div>
+  return <div>user: {user.name}</div>
 })
 
-// 将 Wrapper 修改为 UserModifier
-// 同时，将原先的 UserModifier 的代码放在 createWrapper 的参数中。
-const UserModifier = connect(({ dispatch, state }) => {
+const UserModifier = connect()(({ dispatch, state }) => {
   console.log('UserModifier: ', Math.random())
   const onChange = e =>
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })

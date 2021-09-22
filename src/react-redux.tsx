@@ -19,17 +19,18 @@ export const store = {
   },
 }
 
-export const connect = Component => {
+export const connect = selector => Component => {
   return props => {
     const { state, setState } = store
     const [, update] = useState({})
-
     useEffect(() => store.subscribe(() => update({})), [])
+
+    const data = typeof selector === 'function' ? selector(state) : { state }
 
     const dispatch = action => {
       setState(reducer(state, action))
     }
-    return <Component {...props} dispatch={dispatch} state={state} />
+    return <Component {...props} dispatch={dispatch} {...data} />
   }
 }
 
