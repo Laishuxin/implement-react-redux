@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { AppContext, connect, store } from './react-redux'
+import { connectToUser } from './connectors/connect-to-user'
 
 const App = () => {
   return (
@@ -47,22 +48,18 @@ const Grandson = connect(state => ({ group: state.group }))(
   },
 )
 
-const User = connect(state => ({ user: state.user }))(({ user }) => {
+const User = connectToUser(({ user }) => {
   console.log('User: ', Math.random())
   return <div>user: {user.name}</div>
 })
 
-const UserModifier = connect(null, dispatch => {
-  return {
-    updateUser: payload => dispatch({ type: 'updateUser', payload }),
-  }
-})(({ updateUser, state }) => {
+const UserModifier = connectToUser(({ updateUser, user }) => {
   console.log('UserModifier: ', Math.random())
   const onChange = e => updateUser({ name: e.target.value })
 
   return (
     <div>
-      <input value={state.user.name} onChange={onChange} />
+      <input value={user.name} onChange={onChange} />
     </div>
   )
 })
