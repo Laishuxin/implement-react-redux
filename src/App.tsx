@@ -46,7 +46,8 @@ const Parent = () => (
 const Son = () => (
   <section>
     <h3>Son</h3>
-    <Wrapper />
+    {/* 将 Wrapper 修改为 UserModifier */}
+    <UserModifier />
   </section>
 )
 
@@ -61,15 +62,21 @@ const User = () => {
   return <div>user: {contextValue.appState.user.name}</div>
 }
 
-const Wrapper = () => {
-  const { appState, setAppState } = useContext(AppContext)
-  const dispatch = action => {
-    setAppState(reducer(appState, action))
+// 将 createWrapper 改名为 connect
+// 同时，优化内部代码。
+const connect = Component => {
+  return props => {
+    const { appState, setAppState } = useContext(AppContext)
+    const dispatch = action => {
+      setAppState(reducer(appState, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={appState} />
   }
-  return <UserModifier dispatch={dispatch} state={appState} />
 }
 
-const UserModifier = ({ dispatch, state }) => {
+// 将 Wrapper 修改为 UserModifier
+// 同时，将原先的 UserModifier 的代码放在 createWrapper 的参数中。
+const UserModifier = connect(({ dispatch, state }) => {
   const onChange = e =>
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
 
@@ -78,6 +85,6 @@ const UserModifier = ({ dispatch, state }) => {
       <input value={state.user.name} onChange={onChange} />
     </div>
   )
-}
+})
 
 export default App
