@@ -1,14 +1,46 @@
 // @ts-nocheck
-import { AppContext, connect, store } from './react-redux'
+import { Provider, connect, createStore } from './react-redux'
 import { connectToUser } from './connectors/connect-to-user'
+
+const initState = {
+  user: { name: 'frank', age: 18 },
+  group: { name: 'frontend' },
+}
+
+/**
+ * 基于旧的 `state` 创建新的 `state`，如果不需要改变原有的 `state`，则返回上一次的 `state`。
+ * @param state
+ * @param { type: string, payload: any }
+ * @returns newState
+ */
+const reducer = (state, { type, payload }) => {
+  if (type === 'updateUser') {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload,
+      },
+    }
+  }
+  if (type === 'updateGroup') {
+    return {
+      ...state,
+      group: payload,
+    }
+  }
+  return state
+}
+
+const store = createStore(reducer, initState)
 
 const App = () => {
   return (
-    <AppContext.Provider value={store}>
+    <Provider value={store}>
       <Parent />
       <Son />
       <Grandson />
-    </AppContext.Provider>
+    </Provider>
   )
 }
 

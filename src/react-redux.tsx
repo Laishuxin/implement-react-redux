@@ -1,12 +1,14 @@
 // @ts-nocheck
-import { createContext, useState, useEffect, useMemo } from 'react'
+import { createContext, useState, useEffect } from 'react'
 import { shallowEqual } from './utils'
-export const AppContext = createContext(null)
-export const store = {
-  state: {
-    user: { name: 'frank', age: 18 }, // 暂且进行简单的初始化
-    group: { name: 'frontend' },
-  },
+const AppContext = createContext(null)
+export const Provider = ({ store, ...restProps }) => {
+  return <AppContext.Provider value={store} {...restProps} />
+}
+
+const store = {
+  state: null,
+  reducer: null,
   setState(newState) {
     store.state = newState
     store.listeners.forEach(fn => fn(store.state))
@@ -21,11 +23,17 @@ export const store = {
   },
 }
 
+export const createStore = (reducer, initState) => {
+  store.state = initState
+  store.reducer = reducer
+  return store
+}
+
 export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   return props => {
     const [, update] = useState({})
     const dispatch = action => {
-      store.setState(reducer(store.state, action))
+      store.setState(store.reducer(store.state, action))
     }
 
     mapStateToProps =
@@ -52,29 +60,4 @@ export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
 
     return <Component {...props} {...dispatchers} {...data} />
   }
-}
-
-/**
- * 基于旧的 `state` 创建新的 `state`，如果不需要改变原有的 `state`，则返回上一次的 `state`。
- * @param state
- * @param { type: string, payload: any }
- * @returns newState
- */
-const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload,
-      },
-    }
-  }
-  if (type === 'updateGroup') {
-    return {
-      ...state,
-      group: payload,
-    }
-  }
-  return state
 }
