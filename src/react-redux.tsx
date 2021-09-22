@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createContext, useState, useEffect, useMemo } from 'react'
-import { shallowEqual, isFunc } from './utils'
+import { shallowEqual } from './utils'
 export const AppContext = createContext(null)
 export const store = {
   state: {
@@ -21,11 +21,20 @@ export const store = {
   },
 }
 
-export const connect = selector => Component => {
+export const connect = (selector, mapDispatchToProps) => Component => {
   return props => {
     const [, update] = useState({})
+    const dispatch = action => {
+      store.setState(reducer(store.state, action))
+    }
+
     selector = typeof selector === 'function' ? selector : state => ({ state })
     const data = selector(store.state)
+
+    const dispatchers =
+      typeof mapDispatchToProps === 'function'
+        ? mapDispatchToProps(dispatch)
+        : { dispatch }
 
     useEffect(
       () =>
@@ -38,10 +47,7 @@ export const connect = selector => Component => {
       [data],
     )
 
-    const dispatch = action => {
-      store.setState(reducer(store.state, action))
-    }
-    return <Component {...props} dispatch={dispatch} {...data} />
+    return <Component {...props} {...dispatchers} {...data} />
   }
 }
 

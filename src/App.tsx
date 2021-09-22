@@ -52,10 +52,13 @@ const User = connect(state => ({ user: state.user }))(({ user }) => {
   return <div>user: {user.name}</div>
 })
 
-const UserModifier = connect()(({ dispatch, state }) => {
+const UserModifier = connect(null, dispatch => {
+  return {
+    updateUser: payload => dispatch({ type: 'updateUser', payload }),
+  }
+})(({ updateUser, state }) => {
   console.log('UserModifier: ', Math.random())
-  const onChange = e =>
-    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
+  const onChange = e => updateUser({ name: e.target.value })
 
   return (
     <div>
