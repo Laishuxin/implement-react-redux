@@ -2,6 +2,7 @@
 import { Provider, connect, applyMiddleware } from './react-redux'
 import { connectToUser } from './connectors/connect-to-user'
 import { reduxThunk } from './middlewares/redux-thunk'
+import { reduxPromise } from './middlewares/redux-promise'
 
 const initState = {
   user: { name: 'frank', age: 18 },
@@ -34,7 +35,7 @@ const reducer = (state, { type, payload }) => {
 }
 
 // const store = createStore(reducer, initState)
-const store = applyMiddleware(reduxThunk)(reducer, initState)
+const store = applyMiddleware(reduxThunk, reduxPromise)(reducer, initState)
 
 const App = () => {
   return (
@@ -88,22 +89,26 @@ const User = connectToUser(({ user }) => {
 })
 
 const fetchData = url => {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve({ data: { name: '1s 后返回的结果' } })
+      // reject({ name: 'error...' })
     }, 1000)
   })
 }
 
-const fetchUser = dispatch => {
-  fetchData('/user').then(response => {
-    dispatch({ type: 'updateUser', payload: response.data })
-  })
-}
+const fetchUser = () =>
+  fetchData('/user')
+    .then(response => response.data)
+    .catch({ name: 'unknown' })
 const UserModifier = connect()(({ state, dispatch }) => {
   console.log('UserModifier: ', Math.random())
+
   const handleClick = () => {
-    dispatch(fetchUser)
+    dispatch({
+      type: 'updateUser',
+      payload: fetchUser(),
+    })
   }
 
   return (
