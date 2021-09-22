@@ -46,7 +46,7 @@ const Parent = () => (
 const Son = () => (
   <section>
     <h3>Son</h3>
-    <UserModifier />
+    <Wrapper />
   </section>
 )
 
@@ -61,19 +61,21 @@ const User = () => {
   return <div>user: {contextValue.appState.user.name}</div>
 }
 
-const UserModifier = () => {
+const Wrapper = () => {
   const { appState, setAppState } = useContext(AppContext)
+  const dispatch = action => {
+    setAppState(reducer(appState, action))
+  }
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+
+const UserModifier = ({ dispatch, state }) => {
   const onChange = e =>
-    setAppState(
-      reducer(appState, {
-        type: 'updateUser',
-        payload: { name: e.target.value },
-      }),
-    )
+    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
 
   return (
     <div>
-      <input value={appState.user.name} onChange={onChange} />
+      <input value={state.user.name} onChange={onChange} />
     </div>
   )
 }
