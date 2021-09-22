@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { Provider, connect, createStore } from './react-redux'
+import { Provider, connect, applyMiddleware } from './react-redux'
 import { connectToUser } from './connectors/connect-to-user'
+import { reduxThunk } from './middlewares/redux-thunk'
 
 const initState = {
   user: { name: 'frank', age: 18 },
@@ -32,7 +33,8 @@ const reducer = (state, { type, payload }) => {
   return state
 }
 
-const store = createStore(reducer, initState)
+// const store = createStore(reducer, initState)
+const store = applyMiddleware(reduxThunk)(reducer, initState)
 
 const App = () => {
   return (
@@ -85,13 +87,29 @@ const User = connectToUser(({ user }) => {
   return <div>user: {user.name}</div>
 })
 
-const UserModifier = connectToUser(({ updateUser, user }) => {
+const fetchData = url => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ data: { name: '1s 后返回的结果' } })
+    }, 1000)
+  })
+}
+
+const fetchUser = dispatch => {
+  fetchData('/user').then(response => {
+    dispatch({ type: 'updateUser', payload: response.data })
+  })
+}
+const UserModifier = connect()(({ state, dispatch }) => {
   console.log('UserModifier: ', Math.random())
-  const onChange = e => updateUser({ name: e.target.value })
+  const handleClick = () => {
+    dispatch(fetchUser)
+  }
 
   return (
     <div>
-      <input value={user.name} onChange={onChange} />
+      <div>user: {state.user.name}</div>
+      <button onClick={handleClick}>异步获取 user</button>
     </div>
   )
 })

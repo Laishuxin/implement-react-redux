@@ -16,7 +16,7 @@ const setState = newState => {
   state = newState
   listeners.forEach(listener => listener(state))
 }
-const dispatch = action => setState(reducer(state, action))
+let dispatch = action => setState(reducer(state, action))
 const getState = () => state
 const replaceReducer = nextReducer => (reducer = nextReducer)
 const subscribe = listener => {
@@ -27,9 +27,20 @@ const subscribe = listener => {
   }
 }
 
+export const applyMiddleware = (...middlewares) => {
+  return (reducer, initState) => {
+    const store = createStore(reducer, initState)
+    middlewares.reverse()
+    // dispatch = store.dispatch
+    middlewares.forEach(middleware => (dispatch = middleware(store)(dispatch)))
+    return Object.assign({}, store, { dispatch })
+  }
+}
+
 const store = {
   getState,
   subscribe,
+  dispatch,
   replaceReducer,
 }
 
