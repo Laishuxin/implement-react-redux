@@ -31,14 +31,21 @@ const Son = () => {
   )
 }
 
-const Grandson = () => {
-  console.log('Grandson: ', Math.random())
-  return (
-    <section>
-      <h3>Grandson</h3>
-    </section>
-  )
-}
+const Grandson = connect(state => ({ group: state.group }))(
+  ({ group, dispatch }) => {
+    console.log('Grandson: ', Math.random())
+    const onChange = e => {
+      dispatch({ type: 'updateGroup', payload: { name: e.target.value } })
+    }
+    return (
+      <section>
+        <h3>Grandson</h3>
+        <div>group: {group.name}</div>
+        <input type='text' value={group.name} onChange={onChange} />
+      </section>
+    )
+  },
+)
 
 const User = connect(state => ({ user: state.user }))(({ user }) => {
   console.log('User: ', Math.random())

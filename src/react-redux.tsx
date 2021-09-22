@@ -1,9 +1,11 @@
 // @ts-nocheck
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useMemo } from 'react'
+import { shallowEqual, isFunc } from './utils'
 export const AppContext = createContext(null)
 export const store = {
   state: {
     user: { name: 'frank', age: 18 }, // 暂且进行简单的初始化
+    group: { name: 'frontend' },
   },
   setState(newState) {
     store.state = newState
@@ -21,14 +23,23 @@ export const store = {
 
 export const connect = selector => Component => {
   return props => {
-    const { state, setState } = store
     const [, update] = useState({})
-    useEffect(() => store.subscribe(() => update({})), [])
+    selector = typeof selector === 'function' ? selector : state => ({ state })
+    const data = selector(store.state)
 
-    const data = typeof selector === 'function' ? selector(state) : { state }
+    useEffect(
+      () =>
+        store.subscribe(() => {
+          const newData = selector(store.state)
+          if (!shallowEqual(data, newData)) {
+            update({})
+          }
+        }),
+      [data],
+    )
 
     const dispatch = action => {
-      setState(reducer(state, action))
+      store.setState(reducer(store.state, action))
     }
     return <Component {...props} dispatch={dispatch} {...data} />
   }
@@ -48,6 +59,12 @@ const reducer = (state, { type, payload }) => {
         ...state.user,
         ...payload,
       },
+    }
+  }
+  if (type === 'updateGroup') {
+    return {
+      ...state,
+      group: payload,
     }
   }
   return state
