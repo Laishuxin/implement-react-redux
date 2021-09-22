@@ -1,61 +1,6 @@
 // @ts-nocheck
-import { useContext, createContext, useState, useEffect } from 'react'
+import { AppContext, connect, store } from './react-redux'
 
-const store = {
-  state: {
-    user: { name: 'frank', age: 18 }, // 暂且进行简单的初始化
-  },
-  setState(newState) {
-    store.state = newState
-    store.listeners.forEach(fn => fn(store.state))
-  },
-  listeners: [],
-  subscribe(fn) {
-    store.listeners.push(fn)
-    return () => {
-      const index = store.listeners.indexOf(fn)
-      if (index >= 0) store.listeners.splice(index, 1)
-    }
-  },
-}
-
-/**
- * 基于旧的 `state` 创建新的 `state`，如果不需要改变原有的 `state`，则返回上一次的 `state`。
- * @param state
- * @param { type: string, payload: any }
- * @returns newState
- */
-const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
-      ...state,
-      user: {
-        ...state.user,
-        ...payload,
-      },
-    }
-  }
-  return state
-}
-
-// 将 createWrapper 改名为 connect
-// 同时，优化内部代码。
-const connect = Component => {
-  return props => {
-    const { state, setState } = store
-    const [, update] = useState({})
-
-    // 别忘了导入 useEffect
-    useEffect(() => store.subscribe(() => update({})), [])
-
-    const dispatch = action => {
-      setState(reducer(state, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={state} />
-  }
-}
-
-const AppContext = createContext(null)
 const App = () => {
   return (
     <AppContext.Provider value={store}>
