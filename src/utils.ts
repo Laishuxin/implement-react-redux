@@ -1,4 +1,5 @@
 // @ts-nocheck
+export const isFunc = fn => typeof fn === 'function'
 export const shallowEqual = (o1, o2) => {
   if (o1 === o2) {
     return true
