@@ -21,15 +21,18 @@ export const store = {
   },
 }
 
-export const connect = (selector, mapDispatchToProps) => Component => {
+export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   return props => {
     const [, update] = useState({})
     const dispatch = action => {
       store.setState(reducer(store.state, action))
     }
 
-    selector = typeof selector === 'function' ? selector : state => ({ state })
-    const data = selector(store.state)
+    mapStateToProps =
+      typeof mapStateToProps === 'function'
+        ? mapStateToProps
+        : state => ({ state })
+    const data = mapStateToProps(store.state)
 
     const dispatchers =
       typeof mapDispatchToProps === 'function'
@@ -39,7 +42,7 @@ export const connect = (selector, mapDispatchToProps) => Component => {
     useEffect(
       () =>
         store.subscribe(() => {
-          const newData = selector(store.state)
+          const newData = mapStateToProps(store.state)
           if (!shallowEqual(data, newData)) {
             update({})
           }
