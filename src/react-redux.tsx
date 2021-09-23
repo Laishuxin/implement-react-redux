@@ -77,3 +77,38 @@ export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
     return <Component {...props} {...dispatchers} {...data} />
   }
 }
+
+export function combineReducers(reducers) {
+  if (typeof reducers !== 'object') {
+    return reducers
+  }
+  // 过滤不合法的 reducers
+  const reducerKeys = Object.keys(reducers)
+  const finalReducers = {}
+  for (let i = 0; i < reducerKeys.length; i++) {
+    const key = reducerKeys[i]
+    // 只有是函数才认为是合法的 reducer
+    if (isFunc(reducers[key])) {
+      finalReducers[key] = reducers[key]
+    }
+  }
+
+  const finalReducerKeys = Object.keys(finalReducers)
+  return function combine(state, action) {
+    const nextState = {}
+    let hasChanged = false
+
+    for (let i = 0; i < finalReducerKeys.length; i++) {
+      const key = finalReducerKeys[i]
+      const reducer = finalReducers[key]
+
+      const previousStateForKey = state[key]
+      const nextStateForKey = reducer(previousStateForKey, action)
+      nextState[key] = nextStateForKey
+      hasChanged = hasChanged || previousStateForKey !== nextStateForKey
+    }
+    hasChanged =
+      hasChanged || finalReducerKeys.length !== Object.keys(nextState).length
+    return hasChanged ? nextState : state
+  }
+}
