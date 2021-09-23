@@ -10,7 +10,6 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "classnames": "^2.3.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "4.0.3",
@@ -53,11 +52,11 @@
     "@commitlint/config-conventional": "^12.1.1",
     "husky": ">=6",
     "lint-staged": ">=10",
-    "node-sass": "^6.0.1",
     "prettier": "2.4.0"
   },
   "lint-staged": {
-    "*.{js,css,md,ts,tsx,js,jsx}": "prettier --write"
+    "*.{js,jsx,ts,tsx}": ["eslint"],
+    "*.{js,css,md,ts,tsx,js,jsx}": ["prettier --write"]
   },
   "husky": {
     "hooks": {
