@@ -13,8 +13,10 @@ let state = null
 let reducer = null
 const listeners = []
 const setState = newState => {
-  state = newState
-  listeners.forEach(listener => listener(state))
+  if (state !== newState) {
+    state = newState
+    listeners.forEach(listener => listener(state))
+  }
 }
 let dispatch = action => setState(reducer(state, action))
 const getState = () => state
@@ -24,16 +26,6 @@ const subscribe = listener => {
   return () => {
     const index = listeners.indexOf(listener)
     if (index >= 0) listeners.splice(index, 1)
-  }
-}
-
-export const applyMiddleware = (...middlewares) => {
-  return (reducer, initState) => {
-    const store = createStore(reducer, initState)
-    middlewares.reverse()
-    // dispatch = store.dispatch
-    middlewares.forEach(middleware => (dispatch = middleware(store)(dispatch)))
-    return Object.assign({}, store, { dispatch })
   }
 }
 
@@ -75,6 +67,16 @@ export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
     )
 
     return <Component {...props} {...dispatchers} {...data} />
+  }
+}
+
+export const applyMiddleware = (...middlewares) => {
+  return (reducer, initState) => {
+    const store = createStore(reducer, initState)
+    middlewares.reverse()
+    // dispatch = store.dispatch
+    middlewares.forEach(middleware => (dispatch = middleware(store)(dispatch)))
+    return Object.assign({}, store, { dispatch })
   }
 }
 
